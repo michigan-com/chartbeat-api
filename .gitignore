@@ -1,0 +1,5 @@
+*.swp
+chartbeat
+env.sh
+summary_venv
+chartbeat-api
