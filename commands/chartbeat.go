@@ -16,6 +16,7 @@ import (
 
 var endPoints = []a.ChartbeatApi{
 	fetch.TopPages{},
+	fetch.QuickStats{},
 }
 
 func runChartbeat(command *cobra.Command, args []string) {

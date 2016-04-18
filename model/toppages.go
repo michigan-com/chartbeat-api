@@ -58,9 +58,3 @@ type ArticleStats struct {
 	Visits  int          `json:"visits"`
 	Loyalty LoyaltyStats `json:"loyalty"`
 }
-
-type LoyaltyStats struct {
-	New       int `bson:"new"`
-	Loyal     int `bson:"loyal"`
-	Returning int `bson:"returning"`
-}
