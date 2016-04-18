@@ -24,29 +24,40 @@ var endPoints = []a.ChartbeatApi{
 }
 
 func runChartbeat(command *cobra.Command, args []string) {
-	var startTime time.Time = time.Now()
-	var envConfig, _ = config.GetEnv()
-	var apiConfig, _ = config.GetApiConfig()
-	var wait sync.WaitGroup
+	for {
+		var startTime time.Time = time.Now()
+		var envConfig, _ = config.GetEnv()
+		var apiConfig, _ = config.GetApiConfig()
+		var wait sync.WaitGroup
 
-	var session *mgo.Session
-	if envConfig.MongoUri != "" {
-		session = lib.DBConnect(envConfig.MongoUri)
-		defer session.Close()
+		var session *mgo.Session
+		if envConfig.MongoUri != "" {
+			session = lib.DBConnect(envConfig.MongoUri)
+			defer session.Close()
+		}
+
+		for _, endPoint := range endPoints {
+			wait.Add(1)
+			go func(endPoint a.ChartbeatApi) {
+				sessionCopy := session.Copy()
+				defer sessionCopy.Close()
+
+				snapshot := endPoint.Fetch(apiConfig.Domains, apiConfig.ChartbeatApiKey)
+				snapshot.Save(sessionCopy)
+				wait.Done()
+			}(endPoint)
+		}
+		wait.Wait()
+
+		endTime := time.Now()
+		log.Infof("Elapsed time: %v", endTime.Sub(startTime))
+
+		if loop > 0 {
+			log.Infof("Sleeping for %d seconds...", loop)
+			time.Sleep(time.Duration(loop) * time.Second)
+			log.Info("...and now I'm awake!")
+		} else {
+			break
+		}
 	}
-
-	for _, endPoint := range endPoints {
-		wait.Add(1)
-		go func(endPoint a.ChartbeatApi) {
-			sessionCopy := session.Copy()
-			defer sessionCopy.Close()
-
-			snapshot := endPoint.Fetch(apiConfig.Domains, apiConfig.ChartbeatApiKey)
-			snapshot.Save(sessionCopy)
-			wait.Done()
-		}(endPoint)
-	}
-	wait.Wait()
-
-	log.Info(startTime)
 }
