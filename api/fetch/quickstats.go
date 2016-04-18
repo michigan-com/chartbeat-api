@@ -60,7 +60,6 @@ func (q QuickStats) Fetch(domains []string, apiKey string) m.Snapshot {
 }
 
 func fetchQuickstats(url string) (*m.QuickStats, error) {
-	log.Info(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Errorf("\n\n\tFailed to fetch Quickstats url %v:\n\n\t\t%v", url, err)
