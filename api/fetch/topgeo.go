@@ -73,7 +73,7 @@ func fetchTopGeo(url string) (*m.TopGeo, error) {
 	}
 
 	topGeo := &topGeoResp.Geo
-	topGeo.Source, _ = lib.GetHostFromParams(url)
+	topGeo.Source, _ = lib.GetHostFromParamsAndStrip(url)
 
 	return topGeo, nil
 }

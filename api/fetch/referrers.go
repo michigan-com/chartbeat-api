@@ -73,7 +73,7 @@ func fetchReferrers(url string) (*m.Referrers, error) {
 		return nil, err
 	}
 
-	referrers.Source, _ = lib.GetHostFromParams(url)
+	referrers.Source, _ = lib.GetHostFromParamsAndStrip(url)
 
 	return referrers, nil
 }

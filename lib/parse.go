@@ -96,3 +96,16 @@ func GetHostFromParams(inputUrl string) (string, error) {
 
 	return host, err
 }
+
+/*
+	Chartbeat queries have a GET parameter "host", which represents the host
+ 	we're getting data on. Pull the host from the url and return it. Strip off the
+	domain from it
+	Return host (e.g. freep)
+	Return "" if we don't find one
+*/
+func GetHostFromParamsAndStrip(inputUrl string) (string, error) {
+	host, err := GetHostFromParams(inputUrl)
+	host = strings.Replace(host, ".com", "", 1)
+	return host, err
+}

@@ -61,6 +61,7 @@ func (t TopPages) Fetch(domains []string, apiKey string) m.Snapshot {
 	Given a chartbeat url API, fetch it and return the dat
 */
 func fetchTopPages(url string) (*m.TopPagesData, error) {
+	log.Info(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Errorf("\n\n\tFailed to fetch Toppages url %v:\n\n\t\t%v", url, err)
@@ -78,6 +79,8 @@ func fetchTopPages(url string) (*m.TopPagesData, error) {
 		return nil, err
 	}
 
+	topPages.Site, _ = lib.GetHostFromParamsAndStrip(url)
+
 	return topPages, nil
 }
 
@@ -93,7 +96,6 @@ func formatTopPages(topPages []*m.TopPagesData) (m.Snapshot, error) {
 			for _, page := range topPageData.Pages {
 				article := &m.TopArticle{}
 				articleId := lib.GetArticleId(page.Path)
-				parsedUrl, _ := url.Parse(page.Path)
 
 				if articleId < 0 || lib.IsBlacklisted(page.Path) {
 					continue
@@ -106,7 +108,7 @@ func formatTopPages(topPages []*m.TopPagesData) (m.Snapshot, error) {
 				article.Visits = page.Stats.Visits
 				article.Loyalty = page.Stats.Loyalty
 				article.Authors = lib.ParseAuthors(page.Authors)
-				article.Source = parsedUrl.Host
+				article.Source = topPageData.Site
 
 				topPagesChannel <- article
 			}

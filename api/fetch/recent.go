@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"sync"
 	"time"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -32,11 +33,21 @@ func (r Recent) Fetch(domains []string, apiKey string) m.Snapshot {
 
 		go func(url string) {
 			defer wait.Done()
-			resp, err := fetchRecent(url)
+			recent, err := fetchRecent(url)
 			if err != nil {
 				return
 			}
-			recentChannel <- resp
+			parsedArticles := make([]m.Recent, 0, 100)
+			for _, article := range recent.Recents {
+				articleId := lib.GetArticleId(article.Url)
+
+				if articleId > 0 {
+					article.Host = strings.Replace(article.Host, ".com", "", -1)
+					parsedArticles = append(parsedArticles, article)
+				}
+			}
+			recent.Recents = parsedArticles
+			recentChannel <- recent
 		}(url)
 	}
 	wait.Wait()
@@ -73,7 +84,7 @@ func fetchRecent(url string) (*m.RecentResp, error) {
 
 	recent := &m.RecentResp{}
 	recent.Recents = recentArray
-	recent.Source, _ = lib.GetHostFromParams(url)
+	recent.Source, _ = lib.GetHostFromParamsAndStrip(url)
 
 	return recent, nil
 }

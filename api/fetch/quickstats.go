@@ -81,7 +81,7 @@ func fetchQuickstats(url string) (*m.QuickStats, error) {
 	}
 
 	quickStats := quickStatsResp.Data.Stats
-	quickStats.Source, err = lib.GetHostFromParams(url)
+	quickStats.Source, err = lib.GetHostFromParamsAndStrip(url)
 
 	return quickStats, nil
 }

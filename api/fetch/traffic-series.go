@@ -92,7 +92,7 @@ func fetchTrafficSeries(url string) (*m.TrafficSeriesIn, error) {
 		return nil, err
 	}
 
-	trafficSeriesIn.Data.Source, _ = lib.GetHostFromParams(url)
+	trafficSeriesIn.Data.Source, _ = lib.GetHostFromParamsAndStrip(url)
 
 	return trafficSeriesIn, nil
 }
