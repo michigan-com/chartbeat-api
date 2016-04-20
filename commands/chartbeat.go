@@ -3,6 +3,8 @@ package commands
 import (
 	"sync"
 	"time"
+	"fmt"
+	"net/http"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -48,6 +50,25 @@ func runChartbeat(command *cobra.Command, args []string) {
 			}(endPoint)
 		}
 		wait.Wait()
+
+		if envConfig.GnapiDomain != "" {
+			// Now hit all the necessary endpoints to update mapi
+			// TODO do something different
+			mapiUrls := []string{"popular", "quickstats", "topgeo", "referrers", "recent", "traffic-series"}
+			for _, url := range mapiUrls {
+				wait.Add(1)
+
+				mapiUrl := fmt.Sprintf("%s/%s/", envConfig.GnapiDomain, url)
+				log.Info(mapiUrl)
+				go func (mapiUrl string) {
+					http.Get(mapiUrl)
+					wait.Done()
+				}(mapiUrl)
+			}
+			wait.Wait()
+		} else {
+			log.Info("No Gnapi domain specified, cannot update gnapi instance")
+		}
 
 		endTime := time.Now()
 		log.Infof("Elapsed time: %v", endTime.Sub(startTime))

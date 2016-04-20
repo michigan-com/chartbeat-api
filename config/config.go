@@ -10,6 +10,7 @@ type EnvConfig struct {
   MongoUri        string `envconfig:"mongo_uri"`
   ChartbeatApiKey string `envconfig:"chartbeat_api_key"`
   Domains         string `envconfig:"domains"`
+  GnapiDomain     string `envconfig:"gnapi_domain"`
 }
 
 type ApiConfig struct {
