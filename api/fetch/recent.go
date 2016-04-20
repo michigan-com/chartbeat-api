@@ -21,15 +21,15 @@ var recentEndpoint = "live/recent/v3"
 
 func (r Recent) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching recent...")
-	urlParams := url.Values{}
-	urlParams.Set("apikey", apiKey)
+	queryParams := url.Values{}
+	queryParams.Set("apikey", apiKey)
 	queryParams.Set("limit", "100")
 
 	var wait sync.WaitGroup
 	recentChannel := make(chan *m.RecentResp, len(domains))
 	for _, domain := range domains {
-		urlParams.Set("host", domain)
-		url := fmt.Sprintf("%s/%s?%s", ApiRoot, recentEndpoint, urlParams.Encode())
+		queryParams.Set("host", domain)
+		url := fmt.Sprintf("%s/%s?%s", ApiRoot, recentEndpoint, queryParams.Encode())
 		wait.Add(1)
 
 		go func(url string) {

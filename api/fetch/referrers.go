@@ -20,15 +20,15 @@ var referrersEndpoint = "live/referrers/v3"
 
 func (r Referrers) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching referrers...")
-	urlParams := url.Values{}
-	urlParams.Set("apikey", apiKey)
+	queryParams := url.Values{}
+	queryParams.Set("apikey", apiKey)
 	queryParams.Set("limit", "100")
 
 	var wait sync.WaitGroup
 	referrersChannel := make(chan *m.Referrers, len(domains))
 	for _, domain := range domains {
-		urlParams.Set("host", domain)
-		url := fmt.Sprintf("%s/%s?%s", ApiRoot, referrersEndpoint, urlParams.Encode())
+		queryParams.Set("host", domain)
+		url := fmt.Sprintf("%s/%s?%s", ApiRoot, referrersEndpoint, queryParams.Encode())
 		wait.Add(1)
 
 		go func(url string) {

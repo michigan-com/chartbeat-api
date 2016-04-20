@@ -20,15 +20,15 @@ var topGeoEndpoint = "live/top_geo/v1"
 
 func (t TopGeo) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching topgeo...")
-	urlParams := url.Values{}
-	urlParams.Set("apikey", apiKey)
+	queryParams := url.Values{}
+	queryParams.Set("apikey", apiKey)
 	queryParams.Set("limit", "100")
 
 	var wait sync.WaitGroup
 	topGeoChannel := make(chan *m.TopGeo, len(domains))
 	for _, domain := range domains {
-		urlParams.Set("host", domain)
-		url := fmt.Sprintf("%s/%s?%s", ApiRoot, topGeoEndpoint, urlParams.Encode())
+		queryParams.Set("host", domain)
+		url := fmt.Sprintf("%s/%s?%s", ApiRoot, topGeoEndpoint, queryParams.Encode())
 		wait.Add(1)
 
 		go func(url string) {

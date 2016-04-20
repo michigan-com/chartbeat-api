@@ -20,8 +20,8 @@ var trafficSeriesEndpoint = "historical/traffic/series/"
 
 func (t TrafficSeries) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching traffic series...")
-	urlParams := url.Values{}
-	urlParams.Set("apikey", apiKey)
+	queryParams := url.Values{}
+	queryParams.Set("apikey", apiKey)
 	queryParams.Set("limit", "100")
 
 	var start int
@@ -30,8 +30,8 @@ func (t TrafficSeries) Fetch(domains []string, apiKey string) m.Snapshot {
 	var wait sync.WaitGroup
 	trafficSeriesChannel := make(chan *m.Traffic, len(domains))
 	for _, domain := range domains {
-		urlParams.Set("host", domain)
-		url := fmt.Sprintf("%s/%s?%s", ApiRoot, trafficSeriesEndpoint, urlParams.Encode())
+		queryParams.Set("host", domain)
+		url := fmt.Sprintf("%s/%s?%s", ApiRoot, trafficSeriesEndpoint, queryParams.Encode())
 		wait.Add(1)
 		go func(url string) {
 			defer wait.Done()
