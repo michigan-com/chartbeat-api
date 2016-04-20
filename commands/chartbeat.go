@@ -61,8 +61,12 @@ func runChartbeat(command *cobra.Command, args []string) {
 				mapiUrl := fmt.Sprintf("%s/%s/", envConfig.GnapiDomain, url)
 				log.Info(mapiUrl)
 				go func (mapiUrl string) {
-					http.Get(mapiUrl)
-					wait.Done()
+					defer wait.Done()
+					resp, err := http.Get(mapiUrl)
+					if err != nil {
+						return
+					}
+					defer resp.Body.Close()
 				}(mapiUrl)
 			}
 			wait.Wait()
