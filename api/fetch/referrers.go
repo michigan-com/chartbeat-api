@@ -22,6 +22,7 @@ func (r Referrers) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching referrers...")
 	urlParams := url.Values{}
 	urlParams.Set("apikey", apiKey)
+	queryParams.Set("limit", "100")
 
 	var wait sync.WaitGroup
 	referrersChannel := make(chan *m.Referrers, len(domains))

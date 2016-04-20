@@ -22,6 +22,7 @@ func (t TopGeo) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching topgeo...")
 	urlParams := url.Values{}
 	urlParams.Set("apikey", apiKey)
+	queryParams.Set("limit", "100")
 
 	var wait sync.WaitGroup
 	topGeoChannel := make(chan *m.TopGeo, len(domains))

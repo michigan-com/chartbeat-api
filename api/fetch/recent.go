@@ -23,6 +23,7 @@ func (r Recent) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching recent...")
 	urlParams := url.Values{}
 	urlParams.Set("apikey", apiKey)
+	queryParams.Set("limit", "100")
 
 	var wait sync.WaitGroup
 	recentChannel := make(chan *m.RecentResp, len(domains))

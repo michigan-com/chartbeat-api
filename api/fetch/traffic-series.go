@@ -22,6 +22,7 @@ func (t TrafficSeries) Fetch(domains []string, apiKey string) m.Snapshot {
 	log.Info("Fetching traffic series...")
 	urlParams := url.Values{}
 	urlParams.Set("apikey", apiKey)
+	queryParams.Set("limit", "100")
 
 	var start int
 	var end int
