@@ -24,7 +24,9 @@ func (q QuickStatsSnapshot) Save(session *mgo.Session) {
 		log.Errorf("ERROR: %v", err)
 		return
 	}
-	removeOldSnapshots(quickStatsCol)
+
+	// Capping collections for streaming , so no longer able to delete old snapshots
+	// removeOldSnapshots(quickStatsCol)
 }
 
 type QuickStatsResp struct {
