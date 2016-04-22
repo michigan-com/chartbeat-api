@@ -22,7 +22,8 @@ func (t TopGeoSnapshot) Save(session *mgo.Session) {
 		log.Errorf("Failed to save Topgeo snapshot: %v", err)
 	}
 
-	removeOldSnapshots(collection)
+	// Capping collections for streaming , so no longer able to delete old snapshots
+	// removeOldSnapshots(collection)
 }
 
 type TopGeoResp struct {

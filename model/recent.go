@@ -22,7 +22,9 @@ func (r RecentSnapshot) Save(session *mgo.Session) {
 	if err != nil {
 		log.Errorf("Failed to insert Recent Snapshot: %v", err)
 	}
-	removeOldSnapshots(col)
+
+	// Capping collections for streaming , so no longer able to delete old snapshots
+	// removeOldSnapshots(col)
 }
 
 type RecentResp struct {

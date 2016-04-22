@@ -25,7 +25,9 @@ func (h TrafficSeriesSnapshot) Save(session *mgo.Session) {
 		log.Errorf("Failed to insert Historical snapshot: %v", err)
 		return
 	}
-	removeOldSnapshots(collection)
+
+	// Capping collections for streaming , so no longer able to delete old snapshots
+	// removeOldSnapshots(collection)
 }
 
 type Traffic struct {
