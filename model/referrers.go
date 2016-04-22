@@ -25,7 +25,7 @@ func (r ReferrersSnapshot) Save(session *mgo.Session) {
 	}
 	longIndex := mgo.Index{
 		Key:         []string{"created_at"},
-		ExpireAfter: 24 * 7 * time.Hour,
+		ExpireAfter: 24 * 90 * time.Hour,
 	}
 
 	err := realtimeCollection.EnsureIndex(shortIndex)
