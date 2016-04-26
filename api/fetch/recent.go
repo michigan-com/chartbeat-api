@@ -2,12 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -80,6 +81,12 @@ func fetchRecent(url string) (*m.RecentResp, error) {
 	err = decoder.Decode(&recentArray)
 	if err != nil {
 		log.Errorf("\n\n\tFailed to decode url %s:\n\n\t%v\n", url, err)
+		return nil, err
+	}
+
+	if len(recentArray) == 0 {
+		err = errors.New(fmt.Sprintf("Recents array is 0 for url %s", url))
+		log.Errorf("\n\n\t%s\n\n", err)
 		return nil, err
 	}
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -76,6 +77,12 @@ func fetchTopPages(url string) (*m.TopPagesData, error) {
 
 	if err != nil {
 		log.Errorf("\n\n\tFailed to decode Toppages url %v:\n\n\t\t%v", url, err)
+		return nil, err
+	}
+
+	if len(topPages.Pages) == 0 {
+		err = errors.New(fmt.Sprintf("No top pages returned for %s", url))
+		log.Errorf("\n\n\t%s\n\n\t", err)
 		return nil, err
 	}
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -71,6 +72,12 @@ func fetchReferrers(url string) (*m.Referrers, error) {
 	err = decoder.Decode(referrers)
 	if err != nil {
 		log.Errorf("\n\n\tFailed to decode referrers Url: %s\n\n\t%v\n", url, err)
+		return nil, err
+	}
+
+	if len(referrers.Referrers) == 0 {
+		err = errors.New(fmt.Sprintf("No referrers for url %s", url))
+		log.Fatalf("\n\n\t%s\n\n\t", err)
 		return nil, err
 	}
 

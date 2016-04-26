@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -75,6 +76,12 @@ func fetchTopGeo(url string) (*m.TopGeo, error) {
 
 	topGeo := &topGeoResp.Geo
 	topGeo.Source, _ = lib.GetHostFromParamsAndStrip(url)
+
+	if len(topGeo.Cities) == 0 {
+		err = errors.New(fmt.Sprintf("Cities array is empty for url %s", url))
+		log.Errorf("\n\n\t%s\n\n\t", err)
+		return nil, err
+	}
 
 	return topGeo, nil
 }
