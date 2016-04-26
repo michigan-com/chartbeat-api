@@ -24,7 +24,7 @@ func (r RecentSnapshot) Save(session *mgo.Session) {
 	}
 
 	// Capping collections for streaming , so no longer able to delete old snapshots
-	// removeOldSnapshots(col)
+	removeOldSnapshots(col)
 }
 
 type RecentResp struct {

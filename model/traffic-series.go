@@ -27,7 +27,7 @@ func (h TrafficSeriesSnapshot) Save(session *mgo.Session) {
 	}
 
 	// Capping collections for streaming , so no longer able to delete old snapshots
-	// removeOldSnapshots(collection)
+	removeOldSnapshots(collection)
 }
 
 type Traffic struct {

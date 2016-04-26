@@ -27,7 +27,7 @@ func (t TopPagesSnapshot) Save(session *mgo.Session) {
 	}
 
 	// Capping collections for streaming , so no longer able to delete old snapshots
-	// removeOldSnapshots(snapshotCollection)
+	removeOldSnapshots(snapshotCollection)
 }
 
 type TopArticle struct {
