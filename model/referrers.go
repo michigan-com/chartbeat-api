@@ -16,6 +16,11 @@ type ReferrersSnapshot struct {
 }
 
 func (r ReferrersSnapshot) Save(session *mgo.Session) {
+	// Sanity check, for when API calls fail
+	if len(r.Referrers) == 0 {
+		return
+	}
+
 	realtimeCollection := session.DB("").C("Referrers")
 	historyCollection := session.DB("").C("ReferrerHistory")
 

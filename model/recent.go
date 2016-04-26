@@ -16,6 +16,11 @@ type RecentSnapshot struct {
 }
 
 func (r RecentSnapshot) Save(session *mgo.Session) {
+	// Sanity check, for when API calls fail
+	if len(r.Recents) == 0 {
+		return
+	}
+
 	col := session.DB("").C("Recent")
 	err := col.Insert(r)
 

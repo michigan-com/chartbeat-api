@@ -17,6 +17,11 @@ type QuickStatsSnapshot struct {
 
 // Snapshot interface
 func (q QuickStatsSnapshot) Save(session *mgo.Session) {
+	// Sanity check, for when API calls fail
+	if len(q.Stats) == 0 {
+		return
+	}
+
 	quickStatsCol := session.DB("").C("Quickstats")
 	err := quickStatsCol.Insert(q)
 

@@ -18,6 +18,11 @@ type TrafficSeriesSnapshot struct {
 }
 
 func (h TrafficSeriesSnapshot) Save(session *mgo.Session) {
+	// Sanity check, for when API calls fail
+	if len(h.Traffic) == 0 {
+		return
+	}
+
 	collection := session.DB("").C("TrafficSeries")
 	err := collection.Insert(h)
 
@@ -37,9 +42,9 @@ type Traffic struct {
 
 type TrafficSeriesIn struct {
 	Data struct {
-		Start     int `json:"start"`
-		End       int `json:"end"`
-		Frequency int `json:"frequency"`
+		Start     int    `json:"start"`
+		End       int    `json:"end"`
+		Frequency int    `json:"frequency"`
 		Source    string `bson:"source"`
 
 		Freep       *TrafficSeries `json:"freep.com"`
@@ -69,11 +74,11 @@ type TrafficSeriesIn struct {
 		PortClinton      *TrafficSeries `json:"portclintonnewsherald.com"`
 
 		// Central Ohio omg why are there so many sites help
-		DesMoines        *TrafficSeries `json:"desmoinesregister.com"`
-		PressCitizen           *TrafficSeries `json:"press-citizen.com"`
-		Juice       *TrafficSeries `json:"dmjuice.com"`
-		HawkCentral      *TrafficSeries `json:"hawkcentral.com"`
-		} `json:"data"`
+		DesMoines    *TrafficSeries `json:"desmoinesregister.com"`
+		PressCitizen *TrafficSeries `json:"press-citizen.com"`
+		Juice        *TrafficSeries `json:"dmjuice.com"`
+		HawkCentral  *TrafficSeries `json:"hawkcentral.com"`
+	} `json:"data"`
 }
 
 func (h *TrafficSeriesIn) GetSeries() *TrafficSeries {

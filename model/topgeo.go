@@ -15,6 +15,11 @@ type TopGeoSnapshot struct {
 }
 
 func (t TopGeoSnapshot) Save(session *mgo.Session) {
+	// Sanity check, for when API calls fail
+	if len(t.Cities) == 0 {
+		return
+	}
+
 	collection := session.DB("").C("Topgeo")
 	err := collection.Insert(t)
 

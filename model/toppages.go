@@ -18,6 +18,11 @@ type TopPagesSnapshot struct {
 }
 
 func (t TopPagesSnapshot) Save(session *mgo.Session) {
+	// Sanity check, for when API calls fail
+	if len(t.Articles) == 0 {
+		return
+	}
+
 	snapshotCollection := session.DB("").C("Toppages")
 	err := snapshotCollection.Insert(t)
 
