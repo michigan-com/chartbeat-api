@@ -26,17 +26,17 @@ var endPoints = []a.ChartbeatApi{
 }
 
 func runChartbeat(command *cobra.Command, args []string) {
+	var envConfig, _ = config.GetEnv()
+	var apiConfig, _ = config.GetApiConfig()
+	var wait sync.WaitGroup
+	var session *mgo.Session
+	if envConfig.MongoUri != "" {
+		session = lib.DBConnect(envConfig.MongoUri)
+		defer session.Close()
+	}
+
 	for {
 		var startTime time.Time = time.Now()
-		var envConfig, _ = config.GetEnv()
-		var apiConfig, _ = config.GetApiConfig()
-		var wait sync.WaitGroup
-
-		var session *mgo.Session
-		if envConfig.MongoUri != "" {
-			session = lib.DBConnect(envConfig.MongoUri)
-			defer session.Close()
-		}
 
 		for _, endPoint := range endPoints {
 			wait.Add(1)
