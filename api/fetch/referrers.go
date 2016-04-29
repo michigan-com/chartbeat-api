@@ -77,7 +77,7 @@ func fetchReferrers(url string) (*m.Referrers, error) {
 
 	if len(referrers.Referrers) == 0 {
 		err = errors.New(fmt.Sprintf("No referrers for url %s", url))
-		log.Fatalf("\n\n\t%s\n\n\t", err)
+		log.Errorf("\n\n\t%s\n\n\t", err)
 		return nil, err
 	}
 
