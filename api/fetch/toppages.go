@@ -16,6 +16,13 @@ import (
 	m "github.com/michigan-com/chartbeat-api/model"
 )
 
+/** Sorting stuff */
+type ByVisits []*m.TopArticle
+
+func (a ByVisits) Len() int           { return len(a) }
+func (a ByVisits) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByVisits) Less(i, j int) bool { return a[i].Visits > a[j].Visits }
+
 type TopPages struct{}
 
 var toppagesEndpoint = "live/toppages/v3"
@@ -62,7 +69,6 @@ func (t TopPages) Fetch(domains []string, apiKey string) m.Snapshot {
 	Given a chartbeat url API, fetch it and return the dat
 */
 func fetchTopPages(url string) (*m.TopPagesData, error) {
-	log.Info(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Errorf("\n\n\tFailed to fetch Toppages url %v:\n\n\t\t%v", url, err)
@@ -136,10 +142,3 @@ func formatTopPages(topPages []*m.TopPagesData) (m.Snapshot, error) {
 
 	return snapshot, nil
 }
-
-/** Sorting stuff */
-type ByVisits []*m.TopArticle
-
-func (a ByVisits) Len() int           { return len(a) }
-func (a ByVisits) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByVisits) Less(i, j int) bool { return a[i].Visits > a[j].Visits }

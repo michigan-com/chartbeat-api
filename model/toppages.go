@@ -33,6 +33,36 @@ func (t TopPagesSnapshot) Save(session *mgo.Session) {
 
 	// Capping collections for streaming , so no longer able to delete old snapshots
 	removeOldSnapshots(snapshotCollection)
+
+	t.SaveArticlesToScrape(session)
+}
+
+func (t TopPagesSnapshot) SaveArticlesToScrape(session *mgo.Session) {
+	articleCollection := session.DB("").C("Article")
+	toScrape := make([]interface{}, 0, len(t.Articles))
+
+	log.Info("Determining if there's articles that we need to scrape")
+
+	for _, topArticle := range t.Articles {
+		article := &TopArticle{}
+		articleId := topArticle.ArticleId
+		articleIdQuery := bson.M{ "article_id": articleId }
+		articleCollection.Find(articleIdQuery).One(article)
+
+		if !article.Id.Valid() {
+			toScrape = append(toScrape, articleIdQuery)
+			toScrape = append(toScrape, articleIdQuery)
+		}
+	}
+
+	if len(toScrape) > 0 {
+		bulk := session.DB("").C("ToScrape").Bulk()
+		bulk.Upsert(toScrape...)
+		_, err := bulk.Run()
+		if err != nil {
+			log.Error(err)
+		}
+	}
 }
 
 type TopArticle struct {
