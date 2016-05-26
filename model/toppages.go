@@ -51,7 +51,7 @@ func (t TopPagesSnapshot) SaveArticlesToScrape(session *mgo.Session) {
 		articleIdQuery := bson.M{"article_id": articleId}
 		articleCollection.Find(articleIdQuery).One(article)
 
-		if !article.Id.Valid() || len(article.Summary) == 0 {
+		if !article.Id.Valid() || len(article.Summary) != 3 {
 			toScrape = append(toScrape, articleIdQuery)
 			toScrape = append(toScrape, articleIdQuery)
 		}
