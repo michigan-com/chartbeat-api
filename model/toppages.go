@@ -6,6 +6,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+
+	m "github.com/michigan-com/gannett-newsfetch/model"
 )
 
 /*
@@ -44,12 +46,12 @@ func (t TopPagesSnapshot) SaveArticlesToScrape(session *mgo.Session) {
 	log.Info("Determining if there's articles that we need to scrape")
 
 	for _, topArticle := range t.Articles {
-		article := &TopArticle{}
+		article := &m.Article{}
 		articleId := topArticle.ArticleId
-		articleIdQuery := bson.M{ "article_id": articleId }
+		articleIdQuery := bson.M{"article_id": articleId}
 		articleCollection.Find(articleIdQuery).One(article)
 
-		if !article.Id.Valid() {
+		if !article.Id.Valid() || len(article.Summary) == 0 {
 			toScrape = append(toScrape, articleIdQuery)
 			toScrape = append(toScrape, articleIdQuery)
 		}

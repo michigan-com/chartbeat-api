@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"sync"
-	"time"
 	"fmt"
 	"net/http"
+	"sync"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -59,8 +59,7 @@ func runChartbeat(command *cobra.Command, args []string) {
 				wait.Add(1)
 
 				mapiUrl := fmt.Sprintf("%s/%s/", envConfig.GnapiDomain, url)
-				log.Info(mapiUrl)
-				go func (mapiUrl string) {
+				go func(mapiUrl string) {
 					defer wait.Done()
 					resp, err := http.Get(mapiUrl)
 					if err != nil {
