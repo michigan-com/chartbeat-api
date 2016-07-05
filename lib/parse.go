@@ -62,9 +62,6 @@ func ParseAuthor(author string) []string {
 
 	for _, testAuthor := range splitAuthors {
 		// Parse out "by ..." and "and by..."
-		regex := regexp.MustCompile(`(and )?by `)
-		testAuthor = regex.ReplaceAllString(testAuthor, "")
-
 		if IsInvalidAuthor(testAuthor) {
 			continue
 		}
@@ -75,11 +72,15 @@ func ParseAuthor(author string) []string {
 }
 
 func IsInvalidAuthor(author string) bool {
+	author = strings.ToLower(author)
+	regex := regexp.MustCompile(`(and )?by `)
+	author = regex.ReplaceAllString(author, "")
+
 	if author == "" {
 		return true
 	}
 
-	videoRegex := regexp.MustCompile(`^Video\||^Pages Gallery\|`)
+	videoRegex := regexp.MustCompile(`^video\||^pages gallery\|`)
 	return videoRegex.MatchString(author)
 }
 
