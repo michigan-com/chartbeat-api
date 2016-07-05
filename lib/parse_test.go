@@ -7,7 +7,7 @@ import (
 var badAuthors = []string{
 	"Video|Graham Couch / Lsj",
 	"Video|Newslook",
-	"Pages Gallery|Charlie Riedel",
+	"Story Pages Gallery|Charlie Riedel",
 	"Video|| Judy Putnam",
 	"",
 }

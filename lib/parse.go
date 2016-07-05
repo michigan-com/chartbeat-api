@@ -80,7 +80,7 @@ func IsInvalidAuthor(author string) bool {
 		return true
 	}
 
-	videoRegex := regexp.MustCompile(`^video\||^pages gallery\|`)
+	videoRegex := regexp.MustCompile(`^video\||^story pages gallery\|`)
 	return videoRegex.MatchString(author)
 }
 
