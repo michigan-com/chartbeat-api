@@ -65,13 +65,22 @@ func ParseAuthor(author string) []string {
 		regex := regexp.MustCompile(`(and )?by `)
 		testAuthor = regex.ReplaceAllString(testAuthor, "")
 
-		if testAuthor == "" {
+		if IsInvalidAuthor(testAuthor) {
 			continue
 		}
 		authors = append(authors, testAuthor)
 	}
 
 	return authors
+}
+
+func IsInvalidAuthor(author string) bool {
+	if author == "" {
+		return true
+	}
+
+	videoRegex := regexp.MustCompile(`^Video\||^Pages Gallery\|`)
+	return videoRegex.MatchString(author)
 }
 
 /*
