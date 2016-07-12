@@ -12,84 +12,93 @@ import (
 	"github.com/michigan-com/chartbeat-api/parallel"
 )
 
-func fetch(originalSession *mgo.Session, chartb *chartbeat.Client, domains []string, gnapiDomain string) {
-	q := parallel.New(10)
+type fetcher struct {
+	netq    *parallel.Queue
+	dbq     *parallel.Queue
+	db      *mgo.Database
+	chartb  *chartbeat.Client
+	domains []string
+}
 
-	q.Add(func() error {
-		session := originalSession.Copy()
-		defer session.Close()
+func fetch(session *mgo.Session, chartb *chartbeat.Client, domains []string, gnapiDomain string) {
+	f := &fetcher{
+		netq:    parallel.New(10, "netq"),
+		dbq:     parallel.New(1, "dbq"),
+		db:      session.DB(""),
+		chartb:  chartb,
+		domains: domains,
+	}
 
+	f.netq.Add(func() error {
 		snapshot, err := chartb.FetchTopPages(domains)
 		if err != nil {
 			return err
 		}
 
-		return SaveTopPages(snapshot, session)
+		f.dbq.Add(func() error {
+			return saveTopPages(snapshot, session)
+		})
+		return nil
 	})
 
-	q.Add(func() error {
-		session := originalSession.Copy()
-		defer session.Close()
+	f.fetchQuickStats()
 
-		snapshot, err := chartb.FetchQuickStats(domains)
-		if err != nil {
-			return err
-		}
-
-		return SaveQuickStats(snapshot, session)
-	})
-
-	q.Add(func() error {
-		session := originalSession.Copy()
-		defer session.Close()
-
+	f.netq.Add(func() error {
 		snapshot, err := chartb.FetchRecent(domains)
 		if err != nil {
 			return err
 		}
 
-		return SaveRecent(snapshot, session)
+		f.dbq.Add(func() error {
+			return saveRecent(snapshot, session)
+		})
+		return nil
 	})
 
-	q.Add(func() error {
-		session := originalSession.Copy()
-		defer session.Close()
-
+	f.netq.Add(func() error {
 		snapshot, err := chartb.FetchReferrers(domains)
 		if err != nil {
 			return err
 		}
 
-		return SaveReferrers(snapshot, session)
+		f.dbq.Add(func() error {
+			return saveReferrers(snapshot, session)
+		})
+		return nil
 	})
 
-	q.Add(func() error {
-		session := originalSession.Copy()
-		defer session.Close()
-
+	f.netq.Add(func() error {
 		snapshot, err := chartb.FetchTopGeo(domains)
 		if err != nil {
 			return err
 		}
 
-		return SaveTopGeo(snapshot, session)
+		f.dbq.Add(func() error {
+			return saveTopGeo(snapshot, session)
+		})
+		return nil
 	})
 
-	q.Add(func() error {
-		session := originalSession.Copy()
-		defer session.Close()
-
+	f.netq.Add(func() error {
 		snapshot, err := chartb.FetchTrafficSeries(domains)
 		if err != nil {
 			return err
 		}
 
-		return SaveTrafficSeries(snapshot, session)
+		f.dbq.Add(func() error {
+			return saveTrafficSeries(snapshot, session)
+		})
+		return nil
 	})
 
-	err := q.Wait()
-	if err != nil {
-		log.Errorf("fetch failed: %v", err)
+	neterr := f.netq.Wait()
+	dberr := f.dbq.Wait()
+
+	if neterr != nil {
+		log.Errorf("fetch failed: %v", neterr)
+	}
+	if dberr != nil {
+		log.Errorf("saving failed: %v", dberr)
 	}
 
 	if gnapiDomain != "" {
@@ -114,4 +123,31 @@ func fetch(originalSession *mgo.Session, chartb *chartbeat.Client, domains []str
 	} else {
 		log.Info("No Gnapi domain specified, cannot update gnapi instance")
 	}
+}
+
+func (f *fetcher) fetchQuickStats() {
+	stats := make(map[string]*chartbeat.QuickStats, len(f.domains))
+
+	g := f.netq.NewGroup()
+	for _, domain := range f.domains {
+		g.Add(func() error {
+			log.Infof("Fetching quickstats for %s...", domain)
+			result, err := f.chartb.FetchQuickStats(domain)
+			g.Sync(func() {
+				stats[domain] = result
+			})
+			return err
+		})
+	}
+
+	f.dbq.Add(func() error {
+		log.Info("Waiting for quickstats...")
+		if !g.Wait() {
+			log.Warning("Waiting for quickstats done - FAILED!")
+			return nil
+		}
+		log.Info("Waiting for quickstats done")
+
+		return saveQuickStats(stats, f.db)
+	})
 }

@@ -5,17 +5,24 @@ import (
 )
 
 type Queue struct {
-	capacity   int
+	DebugName string
+	capacity  int
+
 	running    int
 	pending    []func() error
 	firstError error
-	mutex      sync.Mutex
-	wait       sync.WaitGroup
+
+	mutex sync.Mutex
+	wait  sync.WaitGroup
 }
 
-func New(capacity int) *Queue {
+func New(capacity int, debugName string) *Queue {
+	if capacity <= 0 {
+		panic("capacity must be greater than 0")
+	}
 	return &Queue{
-		capacity: capacity,
+		DebugName: debugName,
+		capacity:  capacity,
 	}
 }
 

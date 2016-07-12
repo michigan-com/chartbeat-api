@@ -1,6 +1,4 @@
 *.swp
 .env
-chartbeat
 env.sh
-summary_venv
 chartbeat-api

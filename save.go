@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -11,23 +12,46 @@ import (
 	"github.com/michigan-com/chartbeat-api/chartbeat"
 )
 
-func SaveQuickStats(q *chartbeat.QuickStatsSnapshot, session *mgo.Session) error {
-	// Sanity check, for when API calls fail
-	if len(q.Stats) == 0 {
-		return nil
+type QuickStatsSnapshot struct {
+	Id         bson.ObjectId      `bson:"_id,omitempty"`
+	Created_at time.Time          `bson:"created_at"`
+	Stats      []*QuickStatsEntry `bson:"stats"`
+}
+
+type QuickStatsEntry struct {
+	Source string `bson:source`
+
+	chartbeat.QuickStats `bson:,inline`
+}
+
+type quickStatsSort []*QuickStatsEntry
+
+func (q quickStatsSort) Len() int           { return len(q) }
+func (q quickStatsSort) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
+func (q quickStatsSort) Less(i, j int) bool { return q[i].Visits > q[j].Visits }
+
+func saveQuickStats(stats map[string]*chartbeat.QuickStats, db *mgo.Database) error {
+	snapshot := &QuickStatsSnapshot{}
+	snapshot.Created_at = time.Now()
+	for domain, result := range stats {
+		if result != nil {
+			snapshot.Stats = append(snapshot.Stats, &QuickStatsEntry{getSourceFromDomain(domain), *result})
+		}
 	}
+	sort.Sort(quickStatsSort(snapshot.Stats))
 
-	quickStatsCol := session.DB("").C("Quickstats")
-	err := quickStatsCol.Insert(q)
+	log.Infof("Saving quickstats for %d domains", len(snapshot.Stats))
 
+	coll := db.C("Quickstats")
+	err := coll.Insert(snapshot)
 	if err != nil {
 		return errors.Wrap(err, "failed to save quick stats")
 	}
 
-	return removeOldSnapshots(quickStatsCol)
+	return removeOldSnapshots(coll)
 }
 
-func SaveRecent(r *chartbeat.RecentSnapshot, session *mgo.Session) error {
+func saveRecent(r *chartbeat.RecentSnapshot, session *mgo.Session) error {
 	// Sanity check, for when API calls fail
 	if len(r.Recents) == 0 {
 		return nil
@@ -43,7 +67,7 @@ func SaveRecent(r *chartbeat.RecentSnapshot, session *mgo.Session) error {
 	return removeOldSnapshots(col)
 }
 
-func SaveReferrers(r *chartbeat.ReferrersSnapshot, session *mgo.Session) error {
+func saveReferrers(r *chartbeat.ReferrersSnapshot, session *mgo.Session) error {
 	// Sanity check, for when API calls fail
 	if len(r.Referrers) == 0 {
 		return nil
@@ -92,7 +116,7 @@ func SaveReferrers(r *chartbeat.ReferrersSnapshot, session *mgo.Session) error {
 	return nil
 }
 
-func SaveTopGeo(t *chartbeat.TopGeoSnapshot, session *mgo.Session) error {
+func saveTopGeo(t *chartbeat.TopGeoSnapshot, session *mgo.Session) error {
 	// Sanity check, for when API calls fail
 	if len(t.Cities) == 0 {
 		return nil
@@ -109,7 +133,7 @@ func SaveTopGeo(t *chartbeat.TopGeoSnapshot, session *mgo.Session) error {
 	return removeOldSnapshots(collection)
 }
 
-func SaveTopPages(t *chartbeat.TopPagesSnapshot, session *mgo.Session) error {
+func saveTopPages(t *chartbeat.TopPagesSnapshot, session *mgo.Session) error {
 	// Sanity check, for when API calls fail
 	if len(t.Articles) == 0 {
 		return nil
@@ -161,7 +185,7 @@ func saveTopPagesArticlesToScrape(t *chartbeat.TopPagesSnapshot, session *mgo.Se
 	return nil
 }
 
-func SaveTrafficSeries(h *chartbeat.TrafficSeriesSnapshot, session *mgo.Session) error {
+func saveTrafficSeries(h *chartbeat.TrafficSeriesSnapshot, session *mgo.Session) error {
 	// Sanity check, for when API calls fail
 	if len(h.Traffic) == 0 {
 		return nil
