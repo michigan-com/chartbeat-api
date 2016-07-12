@@ -129,7 +129,8 @@ func (f *fetcher) fetchQuickStats() {
 	stats := make(map[string]*chartbeat.QuickStats, len(f.domains))
 
 	g := f.netq.NewGroup()
-	for _, domain := range f.domains {
+	for _, d := range f.domains {
+		domain := d
 		g.Add(func() error {
 			log.Infof("Fetching quickstats for %s...", domain)
 			result, err := f.chartb.FetchQuickStats(domain)
