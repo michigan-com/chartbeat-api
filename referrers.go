@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -13,9 +14,9 @@ import (
 )
 
 type ReferrersSnapshot struct {
-	Id         bson.ObjectId `bson:"_id,omitempty"`
-	Created_at time.Time     `bson:"created_at"`
-	Referrers  []*Referrers  `bson:"referrers"`
+	Id        bson.ObjectId `bson:"_id,omitempty"`
+	CreatedAt time.Time     `bson:"created_at"`
+	Referrers []*Referrers  `bson:"referrers"`
 }
 
 type Referrers struct {
@@ -26,7 +27,9 @@ type Referrers struct {
 
 func saveReferrers(referrers map[string]*chartbeat.Referrers, db *mgo.Database) error {
 	// Sanity check, for when API calls fail
-	var r = ReferrersSnapshot{}
+	var r = ReferrersSnapshot{
+		CreatedAt: time.Now(),
+	}
 	realtimeCollection := db.C("Referrers")
 	historyCollection := db.C("ReferrerHistory")
 
@@ -40,14 +43,16 @@ func saveReferrers(referrers map[string]*chartbeat.Referrers, db *mgo.Database) 
 		r.Referrers = append(r.Referrers, &refs)
 	}
 
+	fmt.Println("\n\nSAVING REFERRERS\n\n")
+	fmt.Println(r)
+
 	err := realtimeCollection.Insert(r)
 	if err != nil {
 		return errors.Wrap(err, "failed to save referrers snapshot")
-	} else {
-		err = removeOldSnapshots(realtimeCollection)
-		if err != nil {
-			return errors.Wrap(err, "failed to remove old recent snapshots")
-		}
+	}
+	err = removeOldSnapshots(realtimeCollection)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove old recent snapshots")
 	}
 
 	shortIndex := mgo.Index{
@@ -83,7 +88,7 @@ func saveReferrers(referrers map[string]*chartbeat.Referrers, db *mgo.Database) 
 		return errors.Wrap(err, "failed to load latest doc from ReferrerHistory")
 	}
 
-	if err == mgo.ErrNotFound || latest.Created_at.Before(fiveMinutesAgo) {
+	if err == mgo.ErrNotFound || latest.CreatedAt.Before(fiveMinutesAgo) {
 		historyCollection.Insert(r)
 	}
 
