@@ -19,6 +19,11 @@ var goodAuthors = []string{
 	"John Smith",
 }
 
+type DomainTest struct {
+	Url    string
+	Domain string
+}
+
 func TestInvalidAuthor(t *testing.T) {
 	for _, author := range badAuthors {
 		if !IsInvalidAuthor(author) {
@@ -52,6 +57,38 @@ func TestParseAuthor(t *testing.T) {
 		authors := ParseAuthor(author)
 		if len(authors) != 1 {
 			t.Fatalf("Author '%s' should be only one author", author)
+		}
+	}
+}
+
+func TestGetDomainFromUrl(t *testing.T) {
+	urlTest := []DomainTest{
+		DomainTest{
+			"http://google.com",
+			"google.com",
+		},
+		DomainTest{
+			"freep.com/story/news/local/michigan/detroit/2016/07/13/aclu-sues-wayne-co-treasurer-others-over-foreclosures/87025762/",
+			"freep.com",
+		},
+		DomainTest{
+			"http://freep.com/story/news/local/michigan/detroit/2016/07/13/aclu-sues-wayne-co-treasurer-others-over-foreclosures/87025762/",
+			"freep.com",
+		},
+		DomainTest{
+			"http://www.usatoday.com/story/news/politics/onpolitics/2016/07/13/scotus-ruth-bader-ginsburg-trump/87024248/",
+			"www.usatoday.com",
+		},
+		DomainTest{
+			"facebook.com",
+			"facebook.com",
+		},
+	}
+
+	for _, test := range urlTest {
+		domain := GetDomainFromURL(test.Url)
+		if domain != test.Domain {
+			t.Fatalf("Domains dont match:\n\n\texpected: %s\n\tactual: %s", test.Domain, domain)
 		}
 	}
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -91,58 +90,6 @@ func saveTopGeo(t *chartbeat.TopGeoSnapshot, session *mgo.Session) error {
 
 	// Capping collections for streaming , so no longer able to delete old snapshots
 	return removeOldSnapshots(collection)
-}
-
-func saveTopPages(t *chartbeat.TopPagesSnapshot, session *mgo.Session) error {
-	// Sanity check, for when API calls fail
-	if len(t.Articles) == 0 {
-		return nil
-	}
-
-	snapshotCollection := session.DB("").C("Toppages")
-	err := snapshotCollection.Insert(t)
-
-	if err != nil {
-		return errors.Wrap(err, "failed to save Top Pages snapshot")
-	}
-
-	// Capping collections for streaming , so no longer able to delete old snapshots
-	err = removeOldSnapshots(snapshotCollection)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove old Top Pages snapshots")
-	}
-
-	return saveTopPagesArticlesToScrape(t, session)
-}
-
-func saveTopPagesArticlesToScrape(t *chartbeat.TopPagesSnapshot, session *mgo.Session) error {
-	articleCollection := session.DB("").C("Article")
-	toScrape := make([]interface{}, 0, len(t.Articles))
-
-	log.Info("Determining if there's articles that we need to scrape")
-
-	for _, topArticle := range t.Articles {
-		var article newsfetchArticle
-		articleId := topArticle.ArticleId
-		articleIdQuery := bson.M{"article_id": articleId}
-		articleCollection.Find(articleIdQuery).One(&article)
-
-		if !article.Id.Valid() || len(article.Summary) != 3 {
-			toScrape = append(toScrape, articleIdQuery)
-			toScrape = append(toScrape, articleIdQuery)
-		}
-	}
-
-	if len(toScrape) > 0 {
-		bulk := session.DB("").C("ToScrape").Bulk()
-		bulk.Upsert(toScrape...)
-		_, err := bulk.Run()
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func saveTrafficSeries(h *chartbeat.TrafficSeriesSnapshot, session *mgo.Session) error {

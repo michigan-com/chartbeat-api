@@ -119,3 +119,19 @@ func GetHostFromParamsAndStrip(inputUrl string) (string, error) {
 	host = strings.Replace(host, ".com", "", 1)
 	return host, err
 }
+
+/*
+	Get the host from a url, and strip it
+*/
+func GetDomainFromURL(inputUrl string) string {
+	if !strings.HasPrefix(inputUrl, "http") {
+		inputUrl = "http://" + inputUrl
+	}
+
+	parsedUrl, err := url.Parse(inputUrl)
+	if err != nil {
+		return ""
+	}
+
+	return parsedUrl.Host
+}

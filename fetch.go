@@ -29,18 +29,7 @@ func fetch(session *mgo.Session, chartb *chartbeat.Client, domains []string, gna
 		domains: domains,
 	}
 
-	f.netq.Add(func() error {
-		snapshot, err := chartb.FetchTopPages(domains)
-		if err != nil {
-			return err
-		}
-
-		f.dbq.Add(func() error {
-			return saveTopPages(snapshot, session)
-		})
-		return nil
-	})
-
+	f.fetchTopPages()
 	f.fetchQuickStats()
 
 	f.netq.Add(func() error {
@@ -123,6 +112,33 @@ func fetch(session *mgo.Session, chartb *chartbeat.Client, domains []string, gna
 	} else {
 		log.Info("No Gnapi domain specified, cannot update gnapi instance")
 	}
+}
+
+func (f *fetcher) fetchTopPages() {
+	toppages := make(map[string]*chartbeat.TopPagesData, len(f.domains))
+
+	g := f.netq.NewGroup()
+	for _, d := range f.domains {
+		domain := d
+		g.Add(func() error {
+			log.Infof("Fetching toppages fro %s...", domain)
+			result, err := f.chartb.FetchTopPages(domain)
+			g.Sync(func() {
+				toppages[domain] = result
+			})
+			return err
+		})
+	}
+
+	f.dbq.Add(func() error {
+		log.Info("Waiting for toppages...")
+		if !g.Wait() {
+			log.Warning("Waiting for toppages done - FAILED")
+			return nil
+		}
+		log.Info("Waiting for toppages done")
+		return saveTopPages(toppages, f.db)
+	})
 }
 
 func (f *fetcher) fetchQuickStats() {
