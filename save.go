@@ -1,7 +1,6 @@
 package main
 
 import (
-	"sort"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -11,45 +10,6 @@ import (
 
 	"github.com/michigan-com/chartbeat-api/chartbeat"
 )
-
-type QuickStatsSnapshot struct {
-	Id         bson.ObjectId      `bson:"_id,omitempty"`
-	Created_at time.Time          `bson:"created_at"`
-	Stats      []*QuickStatsEntry `bson:"stats"`
-}
-
-type QuickStatsEntry struct {
-	Source string `bson:source`
-
-	chartbeat.QuickStats `bson:,inline`
-}
-
-type quickStatsSort []*QuickStatsEntry
-
-func (q quickStatsSort) Len() int           { return len(q) }
-func (q quickStatsSort) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
-func (q quickStatsSort) Less(i, j int) bool { return q[i].Visits > q[j].Visits }
-
-func saveQuickStats(stats map[string]*chartbeat.QuickStats, db *mgo.Database) error {
-	snapshot := &QuickStatsSnapshot{}
-	snapshot.Created_at = time.Now()
-	for domain, result := range stats {
-		if result != nil {
-			snapshot.Stats = append(snapshot.Stats, &QuickStatsEntry{getSourceFromDomain(domain), *result})
-		}
-	}
-	sort.Sort(quickStatsSort(snapshot.Stats))
-
-	log.Infof("Saving quickstats for %d domains", len(snapshot.Stats))
-
-	coll := db.C("Quickstats")
-	err := coll.Insert(snapshot)
-	if err != nil {
-		return errors.Wrap(err, "failed to save quick stats")
-	}
-
-	return removeOldSnapshots(coll)
-}
 
 func saveRecent(r *chartbeat.RecentSnapshot, session *mgo.Session) error {
 	// Sanity check, for when API calls fail

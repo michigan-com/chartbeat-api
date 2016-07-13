@@ -48,6 +48,13 @@ func main() {
 		os.Exit(ExitCodeErrDependencies)
 	}
 	defer session.Close()
+	db := session.DB("")
+
+	err = migrate(db)
+	if err != nil {
+		log.Fatalf("Migration failed: %v", err)
+		os.Exit(ExitCodeErrProcessing)
+	}
 
 	flag.IntVar(&loopSec, "l", 0, "Time in seconds to sleep before looping and hitting the apis again")
 	flag.Parse()
