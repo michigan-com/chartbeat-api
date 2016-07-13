@@ -31,54 +31,10 @@ func fetch(session *mgo.Session, chartb *chartbeat.Client, domains []string, gna
 
 	f.fetchTopPages()
 	f.fetchQuickStats()
-
-	f.netq.Add(func() error {
-		snapshot, err := chartb.FetchRecent(domains)
-		if err != nil {
-			return err
-		}
-
-		f.dbq.Add(func() error {
-			return saveRecent(snapshot, session)
-		})
-		return nil
-	})
-
-	f.netq.Add(func() error {
-		snapshot, err := chartb.FetchReferrers(domains)
-		if err != nil {
-			return err
-		}
-
-		f.dbq.Add(func() error {
-			return saveReferrers(snapshot, session)
-		})
-		return nil
-	})
-
-	f.netq.Add(func() error {
-		snapshot, err := chartb.FetchTopGeo(domains)
-		if err != nil {
-			return err
-		}
-
-		f.dbq.Add(func() error {
-			return saveTopGeo(snapshot, session)
-		})
-		return nil
-	})
-
-	f.netq.Add(func() error {
-		snapshot, err := chartb.FetchTrafficSeries(domains)
-		if err != nil {
-			return err
-		}
-
-		f.dbq.Add(func() error {
-			return saveTrafficSeries(snapshot, session)
-		})
-		return nil
-	})
+	f.fetchRecent()
+	f.fetchReferrers()
+	f.fetchTopGeo()
+	f.fetchTrafficSeries()
 
 	neterr := f.netq.Wait()
 	dberr := f.dbq.Wait()
@@ -121,11 +77,13 @@ func (f *fetcher) fetchTopPages() {
 	for _, d := range f.domains {
 		domain := d
 		g.Add(func() error {
-			log.Infof("Fetching toppages fro %s...", domain)
+			log.Infof("Fetching toppages from %s...", domain)
 			result, err := f.chartb.FetchTopPages(domain)
-			g.Sync(func() {
-				toppages[domain] = result
-			})
+			if result != nil {
+				g.Sync(func() {
+					toppages[domain] = result
+				})
+			}
 			return err
 		})
 	}
@@ -150,9 +108,11 @@ func (f *fetcher) fetchQuickStats() {
 		g.Add(func() error {
 			log.Infof("Fetching quickstats for %s...", domain)
 			result, err := f.chartb.FetchQuickStats(domain)
-			g.Sync(func() {
-				stats[domain] = result
-			})
+			if result != nil {
+				g.Sync(func() {
+					stats[domain] = result
+				})
+			}
 			return err
 		})
 	}
@@ -166,5 +126,122 @@ func (f *fetcher) fetchQuickStats() {
 		log.Info("Waiting for quickstats done")
 
 		return saveQuickStats(stats, f.db)
+	})
+}
+
+func (f *fetcher) fetchRecent() {
+	recents := make(map[string]*chartbeat.RecentResp, len(f.domains))
+
+	g := f.netq.NewGroup()
+	for _, d := range f.domains {
+		domain := d
+		g.Add(func() error {
+			log.Infof("Fetching recents from %s...", domain)
+			result, err := f.chartb.FetchRecent(domain)
+			if result != nil {
+				g.Sync(func() {
+					recents[domain] = result
+				})
+			}
+			return err
+		})
+	}
+
+	f.dbq.Add(func() error {
+		log.Info("Waiting for recent...")
+		if !g.Wait() {
+			log.Warning("Waiting for recent done - FAILED!")
+			return nil
+		}
+
+		log.Info("Waiting for recent done")
+		return saveRecent(recents, f.db)
+	})
+}
+
+func (f *fetcher) fetchReferrers() {
+	referrers := make(map[string]*chartbeat.Referrers, len(f.domains))
+
+	g := f.netq.NewGroup()
+	for _, d := range f.domains {
+		domain := d
+		g.Add(func() error {
+			log.Infof("Fetching referrers from %s...", domain)
+			result, err := f.chartb.FetchReferrers(domain)
+			if result != nil {
+				g.Sync(func() {
+					referrers[domain] = result
+				})
+			}
+			return err
+		})
+	}
+
+	f.dbq.Add(func() error {
+		log.Info("Waiting for referrers...")
+		if !g.Wait() {
+			log.Warning("Waiting for referrers done - FAILED")
+			return nil
+		}
+		log.Info("Waiting for referrers done")
+		return saveReferrers(referrers, f.db)
+	})
+}
+
+func (f *fetcher) fetchTopGeo() {
+	topGeo := make(map[string]*chartbeat.TopGeoResp, len(f.domains))
+
+	g := f.netq.NewGroup()
+	for _, d := range f.domains {
+		domain := d
+		g.Add(func() error {
+			log.Infof("Fetching top geo from %s...", domain)
+			result, err := f.chartb.FetchTopGeo(domain)
+			if result != nil {
+				g.Sync(func() {
+					topGeo[domain] = result
+				})
+			}
+			return err
+		})
+	}
+
+	f.dbq.Add(func() error {
+		log.Info("waiting for top geo...")
+		if !g.Wait() {
+			log.Warning("Waiting for top geo done - FAILED")
+			return nil
+		}
+		log.Info("Waiting for top geo done")
+		return saveTopGeo(topGeo, f.db)
+	})
+}
+
+func (f *fetcher) fetchTrafficSeries() {
+	trafficSeries := make(map[string]*chartbeat.TrafficSeriesResp, len(f.domains))
+
+	g := f.netq.NewGroup()
+	for _, d := range f.domains {
+		domain := d
+		g.Add(func() error {
+			log.Infof("Fetching traffic serires for %s...", domain)
+			result, err := f.chartb.FetchTrafficSeries(domain)
+			if result != nil {
+				g.Sync(func() {
+					trafficSeries[domain] = result
+				})
+			}
+			return err
+		})
+	}
+
+	f.dbq.Add(func() error {
+		log.Info("Waiting for traffic series...")
+		if !g.Wait() {
+			log.Warning("Waiting for traffic series done - FAILED")
+			return nil
+		}
+		log.Info("Waiting for traffic series done")
+		return saveTrafficSeries(trafficSeries, f.db)
 	})
 }

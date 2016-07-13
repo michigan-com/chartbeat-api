@@ -20,6 +20,11 @@ func (a ByVisits) Len() int           { return len(a) }
 func (a ByVisits) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByVisits) Less(i, j int) bool { return a[i].Visits > a[j].Visits }
 
+type newsfetchArticle struct {
+	Id      bson.ObjectId `bson:"_id,omitempty" json:"_id"`
+	Summary []string      `bson:"summary" json:"summary"`
+}
+
 /*
   Chartbeat Top pages snapshot that will be saved. Article objects from chartbeat api
   will be formatted as TopArticle objects
