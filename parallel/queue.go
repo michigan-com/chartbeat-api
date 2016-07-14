@@ -57,7 +57,7 @@ func (q *Queue) execute(f func() error) {
 
 	if len(q.pending) == 0 {
 		q.running--
-		q.pending = nil // release the memory used by the slice's underlying error
+		q.pending = nil // release the memory used by the slice's underlying array
 	} else {
 		f := q.pending[0]
 		q.pending = q.pending[1:]
