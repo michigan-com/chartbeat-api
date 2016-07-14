@@ -42,6 +42,15 @@ func (q *Queue) Add(f func() error) {
 
 func (q *Queue) Wait() error {
 	q.wait.Wait()
+
+	// No contention is possible on this mutex, but it is required as a memory barrier
+	// because of the Go memory model.
+	//
+	// See https://groups.google.com/forum/#!topic/golang-nuts/5oHzhzXCcmM
+	// and https://github.com/golang/go/issues/5045.
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+
 	return q.firstError
 }
 
