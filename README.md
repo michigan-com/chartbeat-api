@@ -1,24 +1,54 @@
-# Golang Chartbeat API (not really)
+# Gannett's Realtime Analytics [ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load)
 
-Fetch Chartbeat data for Gannett properties and store those in Mongo. Yeah, not an API at all, sorry.
+* Extract data from Chartbeat's API
+* Transform it into meaningful data we can use for realtime analytics
+* Load into a mongo database
 
 ## Setup
 
 1. Install Go dependencies:
 
-        go get
+    ```bash
+    go get
+    ```
 
-2. Build the Go binary:
+2. Build or install the Go binary:
 
-        go install
+    ```bash
+    go build
+    ```
 
-3. Set up environment variables. It is recommended that you copy `.env.sample` into `.env` and adjust as necessary. Apply them via `source .env` or, better yet, use [autoenv](https://github.com/horosgrisa/autoenv).
+    -or-
 
-4. Run `chartbeat-api` from `$GOPATH/bin/`.
+    ```bash
+    go install
+    ```
 
-During development, you can run and restart the server via modd:
+3. Set up environment variables.
 
-    modd
+    It is recommended that you copy `.env.sample` into `.env` and adjust as necessary.
+    Apply them via `source .env`
+
+4. Run `chartbeat-api` from `$GOPATH/bin/`
+
+## [Modd](https://github.com/cortesi/modd)
+
+Modd will reinstall the application and run it again whenever there is a filesystem change in the
+source application directory.  Simply install `modd` then run
+
+```bash
+modd
+```
+
+## Command options
+
+```bash
+chartbeat-api help
+
+Usage of ./chartbeat-api:
+  -l int
+    Time in seconds to sleep before looping and hitting the apis again
+```
 
 ## Required environment variables
 
