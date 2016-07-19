@@ -13,9 +13,9 @@ import (
 )
 
 type QuickStatsSnapshot struct {
-	Id         bson.ObjectId      `bson:"_id,omitempty"`
-	Created_at time.Time          `bson:"created_at"`
-	Stats      []*QuickStatsEntry `bson:"stats"`
+	Id        bson.ObjectId      `bson:"_id,omitempty"`
+	CreatedAt time.Time          `bson:"created_at"`
+	Stats     []*QuickStatsEntry `bson:"stats"`
 }
 
 type QuickStatsEntry struct {
@@ -53,7 +53,7 @@ func saveQuickStats(stats map[string]*chartbeat.QuickStats, db *mgo.Database) er
 	historicalColl := db.C("PlatformStatsDaily")
 
 	snapshot := QuickStatsSnapshot{
-		Created_at: now,
+		CreatedAt: now,
 	}
 	for domain, st := range stats {
 		if st != nil {

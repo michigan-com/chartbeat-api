@@ -12,9 +12,9 @@ import (
 )
 
 type TopGeoSnapshot struct {
-	Id         bson.ObjectId `bson:"_id,omitempty"`
-	Created_at time.Time     `bson:"created_at"`
-	Cities     []*TopGeo     `bson:"cities"`
+	Id        bson.ObjectId `bson:"_id,omitempty"`
+	CreatedAt time.Time     `bson:"created_at"`
+	Cities    []*TopGeo     `bson:"cities"`
 }
 
 type TopGeo struct {
@@ -24,7 +24,10 @@ type TopGeo struct {
 }
 
 func saveTopGeo(topGeoResps map[string]*chartbeat.TopGeoResp, db *mgo.Database) error {
-	var t = TopGeoSnapshot{}
+	now := time.Now()
+	var t = TopGeoSnapshot{
+		CreatedAt: now,
+	}
 	collection := db.C("Topgeo")
 
 	for domain, geo := range topGeoResps {
