@@ -46,20 +46,37 @@ func (q quickStatsSort) Len() int           { return len(q) }
 func (q quickStatsSort) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
 func (q quickStatsSort) Less(i, j int) bool { return q[i].Visits > q[j].Visits }
 
-func saveQuickStats(stats map[string]*chartbeat.QuickStats, db *mgo.Database) error {
-	now := time.Now()
-
-	snapsColl := db.C("Quickstats")
-	historicalColl := db.C("PlatformStatsDaily")
-
-	snapshot := QuickStatsSnapshot{
+func formatQuickStats(now time.Time, stats map[string]*chartbeat.QuickStats) *QuickStatsSnapshot {
+	snapshot := &QuickStatsSnapshot{
 		CreatedAt: now,
 	}
+
 	for domain, st := range stats {
 		if st != nil {
 			snapshot.Stats = append(snapshot.Stats, &QuickStatsEntry{getSourceFromDomain(domain), *st})
 		}
 	}
+
+	return snapshot
+}
+
+func formatPlatformValues(now time.Time, stats map[string]*chartbeat.QuickStats) map[string]interface{} {
+	platformValues := make(map[string]interface{}, len(stats))
+	for domain, st := range stats {
+		if st != nil {
+			platformValues[domain] = PlatformStatsValue{now, st.PlatformEngaged}
+		}
+	}
+
+	return platformValues
+}
+
+func saveQuickStats(stats map[string]*chartbeat.QuickStats, db *mgo.Database) error {
+	now := time.Now()
+	snapsColl := db.C("Quickstats")
+	historicalColl := db.C("PlatformStatsDaily")
+
+	snapshot := formatQuickStats(now, stats)
 	sort.Sort(quickStatsSort(snapshot.Stats))
 
 	log.Infof("Saving quickstats for %d domains", len(snapshot.Stats))
@@ -74,14 +91,9 @@ func saveQuickStats(stats map[string]*chartbeat.QuickStats, db *mgo.Database) er
 		return err
 	}
 
-	platformValues := make(map[string]interface{}, len(stats))
-	for domain, st := range stats {
-		if st != nil {
-			platformValues[domain] = PlatformStatsValue{now, st.PlatformEngaged}
-		}
-	}
+	platformValues := formatPlatformValues(now, stats)
 
-	err = insertHistoricalValues(historicalColl, platformValues, now, 24*time.Hour, 5*time.Minute)
+	err = insertHistoricalValues(historicalColl, platformValues, snapshot.CreatedAt, 24*time.Hour, 5*time.Minute)
 	if err != nil {
 		return err
 	}

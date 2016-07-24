@@ -9,6 +9,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+const quickstatsEndpoint = "live/quickstats/v4"
+
+type QuickStatsData struct {
+	Data *struct {
+		Stats *QuickStats `bson:"stats"`
+	} `bson:"data"`
+}
+
 type QuickStats struct {
 	Visits          int           `bson:"visits"`
 	Links           int           `bson:"links"`
@@ -53,7 +61,7 @@ func (cl *Client) FetchQuickStats(domain string) (*QuickStats, error) {
 		return nil, errors.Errorf("quickstats returned error %d", resp.StatusCode)
 	}
 
-	var r quickStatsResp
+	var r QuickStatsData
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decode quickstats json")
@@ -62,12 +70,4 @@ func (cl *Client) FetchQuickStats(domain string) (*QuickStats, error) {
 	}
 
 	return r.Data.Stats, nil
-}
-
-const quickstatsEndpoint = "live/quickstats/v4"
-
-type quickStatsResp struct {
-	Data *struct {
-		Stats *QuickStats `bson:"stats"`
-	} `bson:"data"`
 }

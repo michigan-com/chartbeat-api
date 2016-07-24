@@ -1,9 +1,9 @@
 package main
 
 import (
-	"testing"
 	"encoding/json"
 	chartb "github.com/michigan-com/chartbeat-api/chartbeat"
+	"testing"
 )
 
 func TestToppagesPipeline(t *testing.T) {
@@ -55,7 +55,7 @@ func TestToppagesPipeline(t *testing.T) {
 	}
 
 	if fData.Headline != "Test title" {
-		t.Errorf("Headline -- Expected: %s, Actual: %s", "Test title", fData)
+		t.Errorf("Headline -- Expected: Test title, Actual: %s", fData.Headline)
 	}
 
 	if fData.Authors[0] != "author1" || fData.Authors[1] != "author2" || fData.Authors[2] != "author3" {
