@@ -24,16 +24,22 @@ type ArticleContent struct {
 }
 
 type ArticleStats struct {
-	Visits          int           `json:"visits"`
-	Loyalty         LoyaltyStats  `json:"loyalty"`
-	Platform        PlatformStats `json:"platform"`
-	PlatformEngaged PlatformStats `json:"platform_engaged"`
-	Direct          int           `json:"direct"`
-	Links           int           `json:"links"`
-	Search          int           `json:"search"`
-	Social          int           `json:"social"`
-	Recirc          int           `json:"recirc"`
-	Idle            int           `json:"idle"`
+	Visits          int             `json:"visits"`
+	Loyalty         LoyaltyStats    `json:"loyalty"`
+	Platform        PlatformStats   `json:"platform"`
+	PlatformEngaged PlatformStats   `json:"platform_engaged"`
+	Referrals       []ReferralStats `json:"toprefs"`
+	Direct          int             `json:"direct"`
+	Links           int             `json:"links"`
+	Search          int             `json:"search"`
+	Social          int             `json:"social"`
+	Recirc          int             `json:"recirc"`
+	Idle            int             `json:"idle"`
+}
+
+type ReferralStats struct {
+	Visitors int    `json:"visitors"`
+	Domain   string `json:"domain"`
 }
 
 func (cl *Client) FetchTopPages(domain string) (*TopPagesData, error) {
