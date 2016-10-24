@@ -60,7 +60,7 @@ type ValueDistrib struct {
 // 	Hist   []int   `json:"hist"`
 // }
 
-func (cl *Client) FetchTopPages(domain string) (*TopPagesData, error) {
+func (cl *Client) FetchTopPages(domain string) ([]*TopPage, error) {
 	var queryParams = url.Values{}
 	queryParams.Set("all_platforms", "1")
 	queryParams.Set("loyalty", "1")
@@ -71,21 +71,21 @@ func (cl *Client) FetchTopPages(domain string) (*TopPagesData, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, errors.Wrap(err, "toppages request failed")
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("toppages api call returned error %d", resp.StatusCode)
+		return nil, errors.Errorf("HTTP error %v", resp.Status)
 	}
 
 	var t TopPagesData
 	err = json.NewDecoder(resp.Body).Decode(&t)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode toppages response")
+		return nil, errors.Wrap(err, errMsgFailedToDecode)
 	} else if len(t.Pages) == 0 {
-		return nil, errors.New("Pages array length is zero")
+		return nil, ErrEmpty
 	}
 
-	return &t, nil
+	return t.Pages, nil
 }

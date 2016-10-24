@@ -11,20 +11,16 @@ import (
 
 var recentEndpoint = "live/recent/v3"
 
-type RecentResp struct {
-	Recents []Recent
-}
-
 type Recent struct {
 	Lat      float32 `json:"lat"`
 	Lng      float32 `json:"lng"`
 	Title    string  `json:"title"`
-	Url      string  `json:"path"`
+	URL      string  `json:"path"`
 	Host     string  `json:"domain"`
 	Platform string  `json:"platform"`
 }
 
-func (cl *Client) FetchRecent(domain string) (*RecentResp, error) {
+func (cl *Client) FetchRecent(domain string) ([]*Recent, error) {
 	queryParams := url.Values{}
 	queryParams.Set("apikey", cl.APIKey)
 	queryParams.Set("limit", "100")
@@ -33,25 +29,21 @@ func (cl *Client) FetchRecent(domain string) (*RecentResp, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, errors.Wrap(err, "recent request failed")
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("recents returned error %d", resp.StatusCode)
+		return nil, errors.Errorf("HTTP error %v", resp.Status)
 	}
 
-	var recents []Recent
+	var recents []*Recent
 	err = json.NewDecoder(resp.Body).Decode(&recents)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode recent response")
+		return nil, errors.Wrap(err, errMsgFailedToDecode)
 	} else if len(recents) == 0 {
-		return nil, errors.New("No recents returned")
+		return nil, ErrEmpty
 	}
 
-	var r = RecentResp{
-		recents,
-	}
-
-	return &r, nil
+	return recents, nil
 }

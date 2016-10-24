@@ -63,20 +63,20 @@ func (cl *Client) FetchQuickStats(domain string) (*QuickStats, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, errors.Wrap(err, "quickstats request failed")
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("quickstats returned error %d", resp.StatusCode)
+		return nil, errors.Errorf("HTTP error %v", resp.Status)
 	}
 
 	var r QuickStatsData
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode quickstats json")
+		return nil, errors.Wrap(err, errMsgFailedToDecode)
 	} else if r.Data == nil || r.Data.Stats == nil {
-		return nil, errors.New("quickstats data or stats is nil")
+		return nil, ErrEmpty
 	}
 
 	return r.Data.Stats, nil

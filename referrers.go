@@ -6,18 +6,17 @@ import (
 	"net/http"
 	"net/url"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2/bson"
 )
 
 var referrersEndpoint = "live/referrers/v3"
 
-type Referrers struct {
+type referrersResp struct {
 	Referrers bson.M `bson:"referrers" json:"referrers"`
 }
 
-func (cl *Client) FetchReferrers(domain string) (*Referrers, error) {
+func (cl *Client) FetchReferrers(domain string) (map[string]int, error) {
 	queryParams := url.Values{}
 	queryParams.Set("apikey", cl.APIKey)
 	queryParams.Set("limit", "100")
@@ -26,18 +25,26 @@ func (cl *Client) FetchReferrers(domain string) (*Referrers, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Errorf("\n\n\tFailed to fetch referrers Url: %s:\n\n\t%v\n", url, err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	referrers := Referrers{}
-	err = json.NewDecoder(resp.Body).Decode(&referrers)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to decode referrers url")
-	} else if len(referrers.Referrers) == 0 {
-		return nil, errors.New("No referrers returned")
+	if resp.StatusCode != 200 {
+		return nil, errors.Errorf("HTTP error %v", resp.Status)
 	}
 
-	return &referrers, nil
+	var referrers referrersResp
+	err = json.NewDecoder(resp.Body).Decode(&referrers)
+	if err != nil {
+		return nil, errors.Wrap(err, errMsgFailedToDecode)
+	} else if len(referrers.Referrers) == 0 {
+		return nil, ErrEmpty
+	}
+
+	result := make(map[string]int, len(referrers.Referrers))
+	for k, v := range referrers.Referrers {
+		c := int(v.(float64) + 0.5)
+		result[k] = c
+	}
+	return result, nil
 }
