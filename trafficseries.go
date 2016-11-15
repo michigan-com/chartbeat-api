@@ -78,7 +78,7 @@ func (cl *Client) FetchTrafficSeries(domain string) (*TrafficSeries, error) {
 	for idx, rawp := range people {
 		var p int
 		if rawp == nil {
-			p = -1
+			p = 0
 		} else {
 			f, ok := rawp.(float64)
 			if !ok {
