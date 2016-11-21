@@ -34,7 +34,7 @@ func (cl *Client) FetchRecent(domain string) ([]*Recent, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("HTTP error %v", resp.Status)
+		return nil, newHTTPCodeError(resp)
 	}
 
 	var recents []*Recent

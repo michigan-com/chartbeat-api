@@ -68,7 +68,7 @@ func (cl *Client) FetchQuickStats(domain string) (*QuickStats, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("HTTP error %v", resp.Status)
+		return nil, newHTTPCodeError(resp)
 	}
 
 	var r QuickStatsData

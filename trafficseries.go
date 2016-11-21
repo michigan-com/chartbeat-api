@@ -43,7 +43,7 @@ func (cl *Client) FetchTrafficSeries(domain string) (*TrafficSeries, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("HTTP error %v", resp.Status)
+		return nil, newHTTPCodeError(resp)
 	}
 
 	var raw trafficSeriesResp
