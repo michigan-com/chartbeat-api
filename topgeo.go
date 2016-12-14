@@ -33,7 +33,7 @@ func (cl *Client) FetchTopGeo(domain string) (*TopGeo, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("HTTP error %v", resp.Status)
+		return nil, newHTTPCodeError(resp)
 	}
 
 	var raw topGeoResp

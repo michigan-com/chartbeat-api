@@ -30,7 +30,7 @@ func (cl *Client) FetchReferrers(domain string) (map[string]int, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.Errorf("HTTP error %v", resp.Status)
+		return nil, newHTTPCodeError(resp)
 	}
 
 	var referrers referrersResp
