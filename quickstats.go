@@ -13,8 +13,8 @@ const quickstatsEndpoint = "live/quickstats/v4"
 
 type QuickStatsData struct {
 	Data *struct {
-		Stats *QuickStats `bson:"stats"`
-	} `bson:"data"`
+		Stats *QuickStats `json:"stats" bson:"stats"`
+	} `json:"data" bson:"data"`
 }
 
 type QuickStats struct {
@@ -28,15 +28,15 @@ type QuickStats struct {
 	Platform        PlatformStats `bson:"platform" json:"platform"`
 	PlatformEngaged PlatformStats `json:"platform_engaged" bson:"platform_engaged"`
 	EngagedTime     ValueDistrib  `json:"engaged_time" bson:"engaged_time"`
-	Loyalty         LoyaltyStats  `bson:"loyalty"`
-	DOMLoadTime     ValueDistrib  `json:"domload"`
+	Loyalty         LoyaltyStats  `json:"loyalty" bson:"loyalty"`
+	DOMLoadTime     ValueDistrib  `json:"domload" bson:"domload"`
 }
 
 type PlatformStats struct {
-	M int `bson:"m"`
-	T int `bson:"t"`
-	D int `bson:"d"`
-	A int `bson:"a"`
+	M int `json:"m" bson:"m"`
+	T int `json:"t" bson:"t"`
+	D int `json:"d" bson:"d"`
+	A int `json:"a" bson:"a"`
 }
 
 func (s *PlatformStats) Add(o PlatformStats) {
@@ -47,9 +47,9 @@ func (s *PlatformStats) Add(o PlatformStats) {
 }
 
 type LoyaltyStats struct {
-	New       int `bson:"new"`
-	Loyal     int `bson:"loyal"`
-	Returning int `bson:"returning"`
+	New       int `json:"new" bson:"new"`
+	Loyal     int `json:"loyal" bson:"loyal"`
+	Returning int `json:"returning" bson:"returning"`
 }
 
 func (cl *Client) FetchQuickStats(domain string) (*QuickStats, error) {
