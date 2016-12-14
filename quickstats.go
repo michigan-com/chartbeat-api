@@ -18,14 +18,14 @@ type QuickStatsData struct {
 }
 
 type QuickStats struct {
-	Visits          int           `bson:"visits"`
-	Links           int           `bson:"links"`
-	Direct          int           `bson:"direct"`
-	Search          int           `bson:"search"`
-	Social          int           `bson:"social"`
-	Recirc          int           `bson:"recirc"`
-	Article         int           `bson:"article"`
-	Platform        PlatformStats `json:"platform" bson:"platform"`
+	Visits          int           `json:"visits" bson:"visits"`
+	Links           int           `json:"links" bson:"links"`
+	Direct          int           `json:"direct" bson:"direct"`
+	Search          int           `json:"search" bson:"search"`
+	Social          int           `json:"social" bson:"social"`
+	Recirc          int           `json:"recirc" bson:"recirc"`
+	Article         int           `json:"article" bson:"article"`
+	Platform        PlatformStats `bson:"platform" json:"platform"`
 	PlatformEngaged PlatformStats `json:"platform_engaged" bson:"platform_engaged"`
 	EngagedTime     ValueDistrib  `json:"engaged_time" bson:"engaged_time"`
 	Loyalty         LoyaltyStats  `bson:"loyalty"`

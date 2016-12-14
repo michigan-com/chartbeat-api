@@ -13,16 +13,16 @@ import (
 var trafficSeriesEndpoint = "historical/traffic/series/"
 
 type TrafficSeries struct {
-	Start     time.Time     `bson:"start"`
-	End       time.Time     `bson:"end"`
-	Frequency time.Duration `bson:"frequency"`
+	Start     time.Time     `json:"start" bson:"start"`
+	End       time.Time     `json:"end" bson:"end"`
+	Frequency time.Duration `json:"frequency" bson:"frequency"`
 
 	Values []TrafficSeriesValue
 }
 
 type TrafficSeriesValue struct {
-	Time   time.Time
-	People int
+	Time   time.Time `json:"time"`
+	People int       `json:"people"`
 }
 
 type trafficSeriesResp struct {
