@@ -17,7 +17,7 @@ type TrafficSeries struct {
 	End       time.Time     `json:"end" bson:"end"`
 	Frequency time.Duration `json:"frequency" bson:"frequency"`
 
-	Values []TrafficSeriesValue
+	Values []TrafficSeriesValue `json:"values"`
 }
 
 type TrafficSeriesValue struct {
