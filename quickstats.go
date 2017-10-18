@@ -25,6 +25,7 @@ type QuickStats struct {
 	Social          int           `json:"social" bson:"social"`
 	Recirc          int           `json:"recirc" bson:"recirc"`
 	Article         int           `json:"article" bson:"article"`
+	Pages           int           `json:"pages" bson:"pages"`
 	Platform        PlatformStats `bson:"platform" json:"platform"`
 	PlatformEngaged PlatformStats `json:"platform_engaged" bson:"platform_engaged"`
 	EngagedTime     ValueDistrib  `json:"engaged_time" bson:"engaged_time"`
