@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var topGeoEndpoint = "live/top_geo/v1"
+var topGeoEndpoint = "live/top_geo/v1/"
 
 type topGeoResp struct {
 	Geo *TopGeo `json:"geo"`

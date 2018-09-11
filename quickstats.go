@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const quickstatsEndpoint = "live/quickstats/v4"
+const quickstatsEndpoint = "live/quickstats/v4/"
 
 type QuickStatsData struct {
 	Data *struct {

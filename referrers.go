@@ -10,7 +10,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-var referrersEndpoint = "live/referrers/v3"
+var referrersEndpoint = "live/referrers/v3/"
 
 type referrersResp struct {
 	Referrers bson.M `bson:"referrers" json:"referrers"`

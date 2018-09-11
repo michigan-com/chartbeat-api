@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var recentEndpoint = "live/recent/v3"
+var recentEndpoint = "live/recent/v3/"
 
 type Recent struct {
 	Lat      float32 `json:"lat"`

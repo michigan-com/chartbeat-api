@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var toppagesEndpoint = "live/toppages/v3"
+var toppagesEndpoint = "live/toppages/v3/"
 
 type TopPagesData struct {
 	Pages []*TopPage `json:"pages"`
